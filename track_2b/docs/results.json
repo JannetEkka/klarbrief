@@ -1,0 +1,302 @@
+{
+ "main": {
+  "replies": 10,
+  "json_valid": 1.0,
+  "points": 66,
+  "grounded_share": 0.803,
+  "exact_matches": 54,
+  "near_matches": 0,
+  "partial_matches": 1,
+  "deadlines_raw": {
+   "precision": 0.667,
+   "recall": 0.571,
+   "tp": 4,
+   "fp": 2,
+   "fn": 3
+  },
+  "deadlines_shown": {
+   "precision": 1.0,
+   "recall": 0.571,
+   "tp": 4,
+   "fp": 0,
+   "fn": 3
+  },
+  "amounts_raw": {
+   "precision": 0.857,
+   "recall": 0.5,
+   "tp": 6,
+   "fp": 1,
+   "fn": 6
+  },
+  "amounts_shown": {
+   "precision": 1.0,
+   "recall": 0.5,
+   "tp": 6,
+   "fp": 0,
+   "fn": 6
+  },
+  "amounts_surfaced": "9/12",
+  "wrong_dates_raw": {
+   "misread_from_letter": 1,
+   "not_in_letter": 1
+  },
+  "wrong_dates_shown": {
+   "misread_from_letter": 0,
+   "not_in_letter": 0
+  },
+  "invented_deadline_on_no_deadline_letters": {
+   "raw": 1,
+   "shown": 0,
+   "of": 3
+  },
+  "unverified_reasons": {
+   "no quote given": 7,
+   "quote not found in the letter": 4,
+   "date 2026-12-21 is not written in the quoted words": 1,
+   "date 2026-03-31 is before the letter's own date (2026-10-12), so it has already passed": 1
+  },
+  "mean_prompt_tokens": 777,
+  "mean_completion_tokens": 388,
+  "mean_seconds": 337.3
+ },
+ "consistency": {
+  "letters_compared": 0,
+  "same_deadlines": 0,
+  "same_amounts": 0
+ },
+ "ablation": {},
+ "by_language": {
+  "en": {
+   "replies": 10,
+   "json_valid": 1.0,
+   "points": 66,
+   "grounded_share": 0.803,
+   "exact_matches": 54,
+   "near_matches": 0,
+   "partial_matches": 1,
+   "deadlines_raw": {
+    "precision": 0.667,
+    "recall": 0.571,
+    "tp": 4,
+    "fp": 2,
+    "fn": 3
+   },
+   "deadlines_shown": {
+    "precision": 1.0,
+    "recall": 0.571,
+    "tp": 4,
+    "fp": 0,
+    "fn": 3
+   },
+   "amounts_raw": {
+    "precision": 0.857,
+    "recall": 0.5,
+    "tp": 6,
+    "fp": 1,
+    "fn": 6
+   },
+   "amounts_shown": {
+    "precision": 1.0,
+    "recall": 0.5,
+    "tp": 6,
+    "fp": 0,
+    "fn": 6
+   },
+   "amounts_surfaced": "9/12",
+   "wrong_dates_raw": {
+    "misread_from_letter": 1,
+    "not_in_letter": 1
+   },
+   "wrong_dates_shown": {
+    "misread_from_letter": 0,
+    "not_in_letter": 0
+   },
+   "invented_deadline_on_no_deadline_letters": {
+    "raw": 1,
+    "shown": 0,
+    "of": 3
+   },
+   "unverified_reasons": {
+    "no quote given": 7,
+    "quote not found in the letter": 4,
+    "date 2026-12-21 is not written in the quoted words": 1,
+    "date 2026-03-31 is before the letter's own date (2026-10-12), so it has already passed": 1
+   },
+   "mean_prompt_tokens": 777,
+   "mean_completion_tokens": 388,
+   "mean_seconds": 337.3
+  },
+  "letters_de": {
+   "replies": 8,
+   "json_valid": 1.0,
+   "points": 54,
+   "grounded_share": 0.815,
+   "exact_matches": 45,
+   "near_matches": 0,
+   "partial_matches": 1,
+   "deadlines_raw": {
+    "precision": 0.667,
+    "recall": 0.8,
+    "tp": 4,
+    "fp": 2,
+    "fn": 1
+   },
+   "deadlines_shown": {
+    "precision": 1.0,
+    "recall": 0.8,
+    "tp": 4,
+    "fp": 0,
+    "fn": 1
+   },
+   "amounts_raw": {
+    "precision": 0.833,
+    "recall": 0.5,
+    "tp": 5,
+    "fp": 1,
+    "fn": 5
+   },
+   "amounts_shown": {
+    "precision": 1.0,
+    "recall": 0.5,
+    "tp": 5,
+    "fp": 0,
+    "fn": 5
+   },
+   "amounts_surfaced": "7/10",
+   "wrong_dates_raw": {
+    "misread_from_letter": 1,
+    "not_in_letter": 1
+   },
+   "wrong_dates_shown": {
+    "misread_from_letter": 0,
+    "not_in_letter": 0
+   },
+   "invented_deadline_on_no_deadline_letters": {
+    "raw": 1,
+    "shown": 0,
+    "of": 3
+   },
+   "unverified_reasons": {
+    "quote not found in the letter": 4,
+    "no quote given": 4,
+    "date 2026-12-21 is not written in the quoted words": 1,
+    "date 2026-03-31 is before the letter's own date (2026-10-12), so it has already passed": 1
+   },
+   "mean_prompt_tokens": 778,
+   "mean_completion_tokens": 410,
+   "mean_seconds": 363.1
+  },
+  "letters_fr": {
+   "replies": 2,
+   "json_valid": 1.0,
+   "points": 12,
+   "grounded_share": 0.75,
+   "exact_matches": 9,
+   "near_matches": 0,
+   "partial_matches": 0,
+   "deadlines_raw": {
+    "precision": 1.0,
+    "recall": 0.0,
+    "tp": 0,
+    "fp": 0,
+    "fn": 2
+   },
+   "deadlines_shown": {
+    "precision": 1.0,
+    "recall": 0.0,
+    "tp": 0,
+    "fp": 0,
+    "fn": 2
+   },
+   "amounts_raw": {
+    "precision": 1.0,
+    "recall": 0.5,
+    "tp": 1,
+    "fp": 0,
+    "fn": 1
+   },
+   "amounts_shown": {
+    "precision": 1.0,
+    "recall": 0.5,
+    "tp": 1,
+    "fp": 0,
+    "fn": 1
+   },
+   "amounts_surfaced": "2/2",
+   "wrong_dates_raw": {
+    "misread_from_letter": 0,
+    "not_in_letter": 0
+   },
+   "wrong_dates_shown": {
+    "misread_from_letter": 0,
+    "not_in_letter": 0
+   },
+   "invented_deadline_on_no_deadline_letters": {
+    "raw": 0,
+    "shown": 0,
+    "of": 0
+   },
+   "unverified_reasons": {
+    "no quote given": 3
+   },
+   "mean_prompt_tokens": 774,
+   "mean_completion_tokens": 302,
+   "mean_seconds": 234.3
+  },
+  "letters_it": {
+   "replies": 0,
+   "json_valid": 0.0,
+   "points": 0,
+   "grounded_share": null,
+   "exact_matches": 0,
+   "near_matches": 0,
+   "partial_matches": 0,
+   "deadlines_raw": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "tp": 0,
+    "fp": 0,
+    "fn": 0
+   },
+   "deadlines_shown": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "tp": 0,
+    "fp": 0,
+    "fn": 0
+   },
+   "amounts_raw": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "tp": 0,
+    "fp": 0,
+    "fn": 0
+   },
+   "amounts_shown": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "tp": 0,
+    "fp": 0,
+    "fn": 0
+   },
+   "amounts_surfaced": "0/0",
+   "wrong_dates_raw": {
+    "misread_from_letter": 0,
+    "not_in_letter": 0
+   },
+   "wrong_dates_shown": {
+    "misread_from_letter": 0,
+    "not_in_letter": 0
+   },
+   "invented_deadline_on_no_deadline_letters": {
+    "raw": 0,
+    "shown": 0,
+    "of": 0
+   },
+   "unverified_reasons": {},
+   "mean_prompt_tokens": 0,
+   "mean_completion_tokens": 0,
+   "mean_seconds": 0.0
+  }
+ }
+}
