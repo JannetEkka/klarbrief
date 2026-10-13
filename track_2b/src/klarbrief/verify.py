@@ -7,8 +7,9 @@ A point is shown to the reader only if:
    verbatim stretch of it covers at least ``PARTIAL_SHARE`` of the quote (paraphrased
    openings), in which case only that stretch is shown as evidence, and
 2. for a deadline, the date it states is written in the matched words of the letter
-   (a deadline with no date, like "within 30 days", is kept as a relative deadline) and is
-   not earlier than the letter's own date (an expired date is not a deadline), and
+   (a deadline with no date, like "within 30 days", is kept as a relative deadline; if the
+   model gave no date but the matched words contain exactly one, that date is read from the
+   letter) and is not earlier than the letter's own date (an expired date is not a deadline), and
 3. for an amount, the CHF value it states is written in the matched words of the letter.
 
 What is displayed as evidence is always the letter's own words at the matched position, never
@@ -163,6 +164,7 @@ class Point:
     end: int | None = None
     match: str | None = None      # exact | near | partial
     date: str | None = None       # deadlines: ISO date, or None for a relative deadline
+    date_from_letter: bool | None = None  # True when the date was read from the letter's words
     chf: float | None = None      # amounts
     verified: bool = False
     reason: str | None = None     # why it is not verified
@@ -257,6 +259,12 @@ def verify(points: list[Point], letter: str) -> list[Point]:
         p.evidence = m.span(letter)
         window = letter[max(0, m.start - CONTEXT_CHARS):m.end + CONTEXT_CHARS]
         if p.kind == "deadline":
+            if not p.date:
+                # The model gave no date but quoted words that contain exactly one: take the
+                # date from the letter itself (never computed, never guessed).
+                in_evidence = parse.find_dates(p.evidence)
+                if len(in_evidence) == 1:
+                    p.date, p.date_from_letter = in_evidence[0].isoformat(), True
             if p.date:
                 if p.date not in {d.isoformat() for d in parse.find_dates(window)}:
                     p.reason = f"date {p.date} is not written in the quoted words"

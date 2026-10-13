@@ -82,6 +82,14 @@ class VerifyTests(unittest.TestCase):
         self.assertTrue(p.verified)
         self.assertIsNone(p.date)
 
+    def test_missing_date_is_read_from_the_quoted_letter_words(self):
+        letter = "Lacfictif, le 20 octobre 2026\n\nNous vous convoquons le mercredi 4 novembre 2026 à 9h30."
+        p = V.verify(V.points_from_model({"deadlines": [
+            {"date": None, "text": "appointment", "quote": "le mercredi 4 novembre 2026 à 9h30"}]}), letter)[0]
+        self.assertTrue(p.verified)
+        self.assertEqual(p.date, "2026-11-04")
+        self.assertTrue(p.date_from_letter)
+
     def test_amount_must_be_in_quoted_words(self):
         ok = self._one(_kind="amounts", chf=120, text="tax", quote="Hundesteuer 2026 von CHF 120.00")
         bad = self._one(_kind="amounts", chf=210, text="tax", quote="Hundesteuer 2026 von CHF 120.00")

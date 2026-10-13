@@ -129,7 +129,7 @@ async function run(){
       const near = p.match !== "exact";
       const chip = {exact: "✓ in letter", near: "≈ in letter", partial: "≈ partly in letter"}[p.match] || "✓ in letter";
       html += `<div class="card" data-i="${p.i}"><div class="k">${LABEL[kind]}</div><div class="v" dir="auto">${esc(value)}${esc(p.text)}</div>
-        <span class="chip ${near ? "near" : ""}">${chip}</span><span class="q ${near ? "near" : ""}">“${esc(p.evidence)}”</span></div>`;
+        <span class="chip ${near ? "near" : ""}">${chip}</span><span class="q ${near ? "near" : ""}">“${esc(p.evidence)}”</span>${p.date_from_letter ? '<div class="empty" style="font-size:12px;margin-top:4px">Date read from these words of the letter.</div>' : ""}</div>`;
     }
   }
   if (e.unverified.length){
