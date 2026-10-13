@@ -135,7 +135,7 @@ async function run(){
   }
   if (e.unverified.length){
     html += `<details><summary>Not shown as fact (${e.unverified.length}): Apertus said these, but the letter does not back them up</summary><ul>` +
-      e.unverified.map(p => `<li><b>${LABEL[p.kind] || p.kind}:</b> <span dir="auto">${esc(p.text)}</span><br><span class="empty">${esc(p.reason)}${p.quote ? ` · quoted: “${esc(p.quote)}”` : ""}</span></li>`).join("") + `</ul></details>`;
+      e.unverified.map(p => `<li><b>${LABEL[p.kind] || p.kind}:</b> ${p.date ? `<b>${esc(p.date)}</b> · ` : ""}${p.chf != null ? `<b>CHF ${p.chf.toFixed(2)}</b> · ` : ""}<span dir="auto">${esc(p.text)}</span><br><span class="empty">${esc(p.reason)}${p.quote ? ` · quoted: “${esc(p.quote)}”` : ""}</span></li>`).join("") + `</ul></details>`;
   }
   $("#out").innerHTML = html;
   document.querySelectorAll(".card").forEach(c => { c.onmouseenter = () => hot(c.dataset.i, true); c.onmouseleave = () => hot(c.dataset.i, false); });

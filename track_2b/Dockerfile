@@ -1,6 +1,7 @@
 # Klarbrief app image. Standard library only: nothing is installed at build or run time,
 # which keeps the image small and auditable for on-premise and air-gapped deployments.
-FROM python:3.12-slim
+ARG BASE_IMAGE=python:3.12-slim
+FROM ${BASE_IMAGE}
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \

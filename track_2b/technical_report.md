@@ -7,7 +7,7 @@
 
 ## 1. Summary
 
-People in Switzerland receive official letters (tax reminders, permit renewals, fines, premium subsidies) in German, French or Italian. 27% of residents do not hold a Swiss passport [1], and many newcomers cannot yet read the language of their commune well enough to catch a deadline. A language model can explain such a letter, but it can also state a deadline that is not in it, and the reader has no way to tell. **Klarbrief** has Apertus 1.5 explain the letter in the reader's language, as a short summary plus points: what to do, by when, how much, what happens otherwise, and who to contact. **Every point must quote the letter**, and a deterministic verifier finds that quote in the letter, checks that a deadline's date or an amount's value is written there, and rejects deadlines that predate the letter. Only points that pass are shown, with the letter's own words highlighted. The rest are listed apart, with the reason. On 48 replies from Apertus 1.5 8B, running offline on a 4-core CPU, Klarbrief showed **28 of 29 true deadlines and no wrong CHF amount**, and cut wrong deadline dates from 5 to 2. On 8 held-out letters written after the verifier was frozen, it showed **no wrong date or amount**.
+People in Switzerland receive official letters (tax reminders, permit renewals, fines, premium subsidies) in German, French or Italian. 27% of residents do not hold a Swiss passport [1], and many newcomers cannot yet read the language of their commune well enough to catch a deadline. A language model can explain such a letter, but it can also state a deadline that is not in it, and the reader has no way to tell. **Klarbrief** has Apertus 1.5 explain the letter in the reader's language, as a short summary plus points: what to do, by when, how much, what happens otherwise, and who to contact. **Every point must quote the letter**, and a deterministic verifier finds that quote in the letter, checks that a deadline's date or an amount's value is written there, and rejects deadlines that predate the letter. Only points that pass are shown, with the letter's own words highlighted. The rest are listed apart, with the reason. On 48 replies from Apertus 1.5 8B, running offline on a 4-core CPU, Klarbrief showed **28 of 29 true deadlines, no wrong CHF amount, and 1 wrong date out of the 7 the model offered**, and every reply was in the reader's language. On 8 held-out letters written after the verifier was frozen, it showed **no wrong date or amount**.
 
 ## 2. Architecture
 
@@ -20,7 +20,8 @@ People in Switzerland receive official letters (tax reminders, permit renewals, 
     - **(b) Check the date.** A deadline's date must be written within the quoted words (±25 characters). A relative deadline ("innert 30 Tagen") must come with `date: null`. If the model gave no date but the matched words contain exactly one, that date is read from the letter.
     - **(c) Check the amount.** An amount's CHF value must be written within the quoted words.
     - **(d) Reject expired dates.** A deadline earlier than the letter's own dateline is rejected as already passed. Dates and amounts are parsed in DE/FR/IT/EN with Swiss number formats (`CHF 1'250.50`, `Fr. 85.–`).
-4. **UI** (`src/klarbrief/server.py`, `static/index.html`). One page served by the Python standard library. The reader pastes a letter, picks a language (15 offered, including Albanian, Tigrinya, Ukrainian, Tamil and Romansh), and sees cards. Hovering a card highlights its words in the letter. Rejected points sit in a collapsed "Not shown as fact" list with their reasons.
+4. **Language check** (`src/klarbrief/langcheck.py`). It identifies the letter's language and checks that the explanation is in the reader's language, using Unicode script for Ukrainian, Arabic, Persian, Tamil and Tigrinya and common words for Latin-script languages. A reply in the wrong language gets one retry ("rewrite in Ukrainian, keep quotes, dates and amounts"). If it is still wrong, the UI says so.
+5. **UI** (`src/klarbrief/server.py`, `static/index.html`). One page served by the Python standard library. The reader pastes a letter, picks a language (15 offered, including Albanian, Tigrinya, Ukrainian, Tamil and Romansh), and sees cards. Hovering a card highlights its words in the letter. Rejected points sit in a collapsed "Not shown as fact" list with their reasons.
 
 ### Target architecture (mandatory)
 
@@ -56,44 +57,49 @@ Licence: CC-BY-4.0 (also offered under CDLA-Permissive-2.0). Every raw model rep
 
 **Task:** explain each of the 20 dev letters in English and in Ukrainian (40 replies), and each held-out letter in English (8 replies). Then compare what would be shown with the labels.
 
-**Baseline:** the same model's points shown *without* the verifier, which is what a plain "explain this letter" app displays.
+**Baseline:** the same model's points shown *without* the verifier (blue in Figure 2), which is what a plain "explain this letter" app displays. **Ablations:** two earlier versions of the pipeline, kept in `data/results/` and re-scored with the final verifier.
 
-| Run (Apertus 1.5 8B Q4_K_M, local CPU) | Replies | Points with quote found | True deadlines shown | Wrong deadline dates, raw → shown | Wrong CHF amounts, raw → shown | Deadline invented on a letter with none, raw → shown | Amounts visible to reader | s / letter |
-|---|---|---|---|---|---|---|---|---|
-| Plain JSON mode · 20 dev letters · EN | 20 | 79% | 7 / 12 | 4 → **0** | 2 → **0** | 3 → **0** of 8 | 16 / 21 | 318 |
-| Schema-constrained · 20 dev letters · EN + UK | 40 | 92% | **24 / 24** | 4 → 2 | 0 → 0 | 4 → 2 of 16 | 40 / 42 | 301 |
-| Schema-constrained · 8 held-out letters · EN | 8 | 92% | 4 / 5 | 1 → **0** | 0 → 0 | 1 → **0** of 3 | **8 / 8** | 287 |
+| Pipeline (Apertus 1.5 8B Q4_K_M, local CPU) | Letters · reader language | Replies | In reader's language | Points with quote found | True deadlines shown | Wrong deadline dates, raw → shown | Wrong CHF amounts, raw → shown | Invented deadline on a letter with none, raw → shown | Amounts visible | s / letter |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Ablation A: plain JSON mode | 20 dev · EN | 20 | 20/20 | 79% | 7/12 | 4 → 0 | 2 → 0 | 3 → 0 of 8 | 16/21 | 318 |
+| Ablation B: + output schema | 20 dev · EN, UK | 40 | 27/40 | 92% | 24/24 | 4 → 2 | 0 → 0 | 4 → 2 of 16 | 40/42 | 301 |
+| **Final: + reader language restated, checked** | 20 dev · EN, UK | 40 | **40/40** | 92% | **24/24** | 6 → 1 | 2 → **0** | 6 → 1 of 16 | 37/42 | 300 |
+| **Final, held out** | 8 held-out · EN | 8 | **8/8** | 87% | 4/5 | 1 → **0** | 0 → 0 | 1 → **0** of 3 | 7/8 | 251 |
 
-![Figure 2. All 48 schema-constrained replies: what a plain "explain this letter" app would show (blue) and what Klarbrief shows (orange). "Correct" counts true deadlines and CHF amounts listed as such; 48 of the 50 labelled amounts are visible to the reader somewhere in a verified point.](docs/results.png)
+![Figure 2. Final pipeline, all 48 replies: what a plain "explain this letter" app would show (blue) and what Klarbrief shows (orange). "Correct" counts true deadlines and CHF amounts listed as such. 44 of the 50 labelled amounts are visible to the reader somewhere in a verified point.](docs/results.png)
 
 **What the verifier caught.**
-- **Invented dates for relative deadlines.** "Innert 30 Tagen" became 21 December 2026 in one reply, and the letter's own date (21 September) in another. "Entro 30 giorni" became 19 November. The invoice date was offered for "30 giorni dalla data della fattura" in a held-out letter. All were blocked, because the date is not in the quoted words.
-- **An expired date.** The original deadline that de-04 says has already passed was listed as a deadline (rule d).
-- **Two wrong CHF amounts** in the plain-JSON run.
 
-**What got through.** The two wrong dates shown are both "ab dem 6. Januar 2027": the start of a new waste-collection day, presented as a deadline (in English and in Ukrainian). The date really is in the letter, so only an interpretation check would catch it (§6).
+- **Dates attached to relative deadlines.** Letters that say "innert 30 Tagen" or "entro 30 giorni" got the letter's own date (21 September, 19 October, 1 October) or the invoice date (14 October, held out). In an ablation run, a computed date (21 December) was attached too. All were blocked: the quoted words hold no such date, or the quote was not in the letter.
+- **An expired date** (rule d, ablation run).
+- **Two wrong CHF amounts** in each of ablation A and the final run.
 
-**Output structure matters as much as the check.** With plain JSON mode, the quantised model sometimes produced valid JSON with a broken structure: a deadline list swallowed by a stray string, or a reply cut off mid-object. All 5 true deadlines missing from that run came from replies with no `deadlines` field at all, swallowed by a broken structure or skipped, so the verifier never saw them. Sending the exact output schema, in which every field is required (`response_format=json_schema`; llama.cpp turns it into a grammar), raised the true deadlines found on the same 20 English letters from 7/12 to 12/12, and the share of points whose quote is found from 79% to 94%.
+**What got through.** The one wrong date shown in the final run is "ab dem 6. Januar 2027": the start of a new waste-collection day, presented as a deadline. The date really is in the letter, so only an interpretation check would catch it (§6).
 
-**Same facts in every language.** For all 20 dev letters, the English and Ukrainian explanations showed the same deadlines and the same amounts. The facts are anchored in the letter's words, so the reader's language does not change them.
+**Each engineering step was measured.**
 
-**Held out.** The 8 held-out letters (new topics: electricity bill, military-service exemption tax, library reminder, childcare subsidy, census notice, vehicle inspection, school consent, vehicle tax) were written after the verifier was frozen. No wrong date or amount was shown. The one true deadline not shown (the vehicle-inspection appointment) was never offered by the model, so the verifier did not block it.
+- **(A → B) Output schema.** With plain JSON mode, the quantised model sometimes produced valid JSON with a broken structure. All 5 true deadlines missing from run A came from replies with no `deadlines` field at all, swallowed by a broken structure or skipped. Sending the exact output schema (`response_format=json_schema`; llama.cpp turns it into a grammar), in which every field is required, found all 24.
+- **(B → Final) Reader language.** B exposed the next problem: only 7 of 20 Ukrainian explanations were actually in Ukrainian. The rest drifted into the letter's language or English, although the checked facts were the same. Restating the reader's language after the letter fixed all 20, at first try; the retry never had to fire.
 
-**Cost.** One letter takes 762 prompt tokens and 435 output tokens. On the 4-vCPU machine (no GPU), with 4 parallel slots, the 40-reply run took 50 minutes: about 47 letters an hour, at no marginal cost and with nothing leaving the machine. A commune can run this on hardware it already has; a GPU would make each reply interactive.
+**Same facts in every language.** For 19 of the 20 dev letters, the English and Ukrainian explanations showed the same deadlines and amounts. The facts are anchored in the letter's words, not in the reader's language.
+
+**Held out.** The 8 held-out letters were written after the verifier was frozen. They cover new topics: electricity bill, military-service exemption tax, library reminder, childcare subsidy, census notice, vehicle inspection, school consent and vehicle tax. No wrong date or amount was shown. The one true deadline not shown (a vehicle-inspection appointment) was never offered by the model.
+
+**Cost.** One letter takes about 790 prompt tokens and 440 output tokens. On the 4-vCPU machine (no GPU), with 4 parallel slots, the final 48-reply run took 60 minutes: about 48 letters an hour, at no marginal cost and with nothing leaving the machine. A commune can run this on hardware it already has. A GPU would make each reply interactive (not measured here).
 
 ## 6. Limitations
 
 - **The verifier checks provenance, not interpretation.** A point whose quote and date are really in the letter but misread (a start date presented as a deadline, as in de-06) passes the checks. Rule (d) catches one such pattern, expired dates.
-- **Tuned on the dev letters.** Rule (d), the partial-match rules and the "date read from the letter" rule were added after inspecting replies to the 20 dev letters, so dev numbers are optimistic. That is why the 8 held-out letters exist. One held-out observation: the dateline parser does not recognise "Data fattura:" (ho-it-02), so rule (d) would not have applied there. We left the frozen verifier unchanged.
-- **Strictness costs recall.** A correct point whose quote the model paraphrased beyond the near/partial rules is hidden. In the main run 26 of 320 points (8%) were hidden, mostly contacts and actions. For deadlines and amounts the reader still saw 28 of 29 true deadlines and 48 of 50 amounts.
-- **The explanation text itself is not verified.** The summary and each point's wording in the reader's language come from the model. The checks cover the quote, date and amount, not the translation. We did not have native speakers rate the Ukrainian output.
+- **Tuned on the dev letters.** Rule (d), the partial-match rules, the "date read from the letter" rule and the reader-language reminder were added after inspecting replies to the 20 dev letters, so dev numbers are optimistic. That is why the 8 held-out letters exist. One held-out observation: the dateline parser does not recognise "Data fattura:" (ho-it-02), so rule (d) would not have applied there. We left the frozen verifier unchanged.
+- **Strictness costs recall.** A correct point whose quote the model paraphrased beyond the near/partial rules is hidden. In the final run 30 of 323 points (9%) were hidden, mostly topics, contacts and actions whose quote was translated or paraphrased. Ukrainian replies lost slightly more. For deadlines and amounts the reader still saw 28 of 29 true deadlines and 44 of 50 amounts.
+- **The explanation text itself is not verified.** The summary and each point's wording come from the model. The checks cover the quote, date and amount, not the translation. One English summary renamed the commune "Beispielwil" to "Examplewil". We did not have native speakers rate the Ukrainian output, and the language check detects the language, not its quality.
 - **Small, synthetic test set.** 28 letters written by us (20 dev, 8 held-out), not real correspondence. Real letters bring scans, tables, payment slips (QR-bill) and legal boilerplate.
-- **Quantised community build on CPU.** The numbers are for the Q4_K_M text-only 8B model, not the official BF16 checkpoint or the 70B. On a 4-core CPU one letter takes about 5 minutes; we did not measure GPU or hosted latency. llama.cpp's batched decoding is not bit-identical across batch sizes, so re-running can change individual replies slightly. Re-scoring the recorded replies is exact.
+- **Quantised community build on CPU.** The numbers are for the Q4_K_M text-only 8B model at `temperature 0`, one run per letter, not the official BF16 checkpoint or the 70B. On a 4-core CPU one letter takes about 5 minutes; we did not measure GPU or hosted latency. llama.cpp's batched decoding is not bit-identical across batch sizes, so re-running can change individual replies slightly. Re-scoring the recorded replies is exact.
 - **Not legal advice.** The UI points readers to the contact named in the letter.
 
 ## 7. Reproducibility
 
-- `make test`: 28 unit tests (standard library `unittest`) in the app container.
+- `make test`: 34 unit tests (standard library `unittest`) in the app container. They include seam tests that run the whole explain → language check → retry → verify path against a stand-in model.
 - `make run`: re-scores every recorded reply in `data/results/` (exact, no model needed), explains three letters live if an endpoint is configured, and serves the UI. Without an endpoint, the UI replays recorded replies for the sample letters, labelled as replayed.
 - `make onprem`: downloads the pinned model and runs the whole stack offline. `make eval` regenerates `data/results/<model>.jsonl` (resumable).
 - Hardware for the reported run: 4 vCPU, 16 GB RAM, no GPU; llama.cpp `ghcr.io/ggml-org/llama.cpp:server` (pulled 13 Oct 2026); `temperature 0`, `seed 0`, 4 parallel slots. Every reply carries its timestamp, token counts and output mode in `data/results/*.jsonl`. `make score` recomputes every number in this section exactly.
