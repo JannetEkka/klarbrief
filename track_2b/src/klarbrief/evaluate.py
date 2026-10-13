@@ -15,7 +15,7 @@ from collections import Counter
 from pathlib import Path
 
 from . import parse
-from .explain import OUTPUT_SCHEMA, build_messages, from_model_text
+from .explain import explain, from_model_text, language_of_reply
 from .llm import LLM
 
 DATA = Path(__file__).resolve().parents[2] / "data"
@@ -44,20 +44,23 @@ def run(llm: LLM, out: Path, langs: list[str], ids: list[str] | None = None,
     def _one(job: tuple[dict, str]) -> None:
         letter, lang = job
         t0 = time.monotonic()
-        reply = llm.chat(build_messages(letter["text"], lang), schema=OUTPUT_SCHEMA, seed=seed)
+        res = explain(letter["text"], lang, llm, seed=seed)
         rec = {
             "letter_id": letter["id"], "target_lang": lang, "model": llm.s.model,
             "endpoint": llm.s.base_url, "seed": seed, "temperature": 0.0,
-            "raw_text": reply.text, "prompt_tokens": reply.prompt_tokens,
-            "completion_tokens": reply.completion_tokens, "seconds": reply.seconds,
-            "output_mode": reply.output_mode, "recorded_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "raw_text": res.raw_text, "first_raw_text": res.first_raw_text,
+            "retried": res.retried, "language_ok": res.language_ok,
+            "prompt_tokens": res.prompt_tokens, "completion_tokens": res.completion_tokens,
+            "seconds": round(res.seconds, 2),
+            "output_mode": res.reply.output_mode if res.reply else None,
+            "recorded_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         }
         with lock:
             with out.open("a", encoding="utf-8") as f:
                 f.write(json.dumps(rec, ensure_ascii=False) + "\n")
             counter[0] += 1
-            print(f"[{counter[0]}/{total}] {letter['id']} -> {lang}: {reply.completion_tokens} tokens, "
-                  f"{time.monotonic() - t0:.0f}s", flush=True)
+            print(f"[{counter[0]}/{total}] {letter['id']} -> {lang}: {res.completion_tokens} tokens, "
+                  f"{time.monotonic() - t0:.0f}s{' (retried for language)' if res.retried else ''}", flush=True)
 
     with ThreadPoolExecutor(max_workers=max(1, workers)) as pool:
         for f in [pool.submit(_one, j) for j in jobs]:
@@ -85,6 +88,11 @@ def score_records(records: list[dict]) -> dict:
         expl, ok = from_model_text(rec["raw_text"], letter["text"], rec["target_lang"])
         c["replies"] += 1
         c["json_ok"] += ok
+        lang_final = language_of_reply(rec["raw_text"], rec["target_lang"])
+        lang_first = language_of_reply(rec.get("first_raw_text") or rec["raw_text"], rec["target_lang"])
+        c["lang_ok_final"] += lang_final is True
+        c["lang_ok_first"] += lang_first is True
+        c["retried"] += bool(rec.get("retried"))
         if not ok:
             c["fn_d_raw"] += len(gold_d); c["fn_d_shown"] += len(gold_d)
             c["fn_a_raw"] += len(gold_a); c["fn_a_shown"] += len(gold_a)
@@ -136,6 +144,9 @@ def score_records(records: list[dict]) -> dict:
     summary = {
         "replies": c["replies"],
         "json_valid": round(c["json_ok"] / n, 3),
+        "in_reader_language_first_try": f"{c['lang_ok_first']}/{c['replies']}",
+        "in_reader_language": f"{c['lang_ok_final']}/{c['replies']}",
+        "retried_for_language": c["retried"],
         "points": c["points"],
         "grounded_share": round(c["points_shown"] / c["points"], 3) if c["points"] else None,
         "exact_matches": c["match_exact"], "near_matches": c["match_near"], "partial_matches": c["match_partial"],

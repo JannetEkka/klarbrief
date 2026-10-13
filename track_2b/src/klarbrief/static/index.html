@@ -119,7 +119,8 @@ async function run(){
   const e = d.explanation, shown = e.shown;
   const all = shown.map((p, i) => ({...p, i}));
   renderLetter(current, shown);
-  let html = `<div class="meta">${d.mode === "replay" ? `Replayed reply from <b>${esc(d.model)}</b>, recorded ${esc((d.recorded_at||"").slice(0,10))}` : `Live · ${esc(d.model)}`} · ${d.seconds != null ? Math.round(d.seconds) + " s" : ""}<span class="badge">${shown.length} checked</span>${e.unverified.length ? `<span class="badge">${e.unverified.length} not shown</span>` : ""}</div>`;
+  let html = `<div class="meta">${d.mode === "replay" ? `Replayed reply from <b>${esc(d.model)}</b>, recorded ${esc((d.recorded_at||"").slice(0,10))}` : `Live · ${esc(d.model)}`} · ${d.seconds != null ? Math.round(d.seconds) + " s" : ""}<span class="badge">${shown.length} checked</span>${d.retried ? '<span class="badge">asked twice for your language</span>' : ""}${e.unverified.length ? `<span class="badge">${e.unverified.length} not shown</span>` : ""}</div>`;
+  if (d.language_ok === false) html += `<div class="err" style="margin-bottom:12px">Apertus did not answer in ${esc(cfg.languages[lang] || lang)}${d.retried ? ", even when asked a second time" : ""}. The checked points below still come from the letter's own words.</div>`;
   html += `<p class="summary" dir="auto">${esc(e.summary)}</p>`;
   for (const kind of ORDER){
     for (const p of all.filter(x => x.kind === kind)){

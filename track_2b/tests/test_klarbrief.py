@@ -8,6 +8,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from klarbrief import evaluate as E  # noqa: E402
+from klarbrief import langcheck as LC  # noqa: E402
+from klarbrief.explain import explain  # noqa: E402
+from klarbrief.llm import Reply  # noqa: E402
 from klarbrief import parse  # noqa: E402
 from klarbrief import verify as V  # noqa: E402
 from klarbrief.explain import from_model_text, parse_json  # noqa: E402
@@ -175,6 +178,72 @@ class ModelOutputTests(unittest.TestCase):
         self.assertTrue(ok)
         self.assertEqual(len(expl.shown), 2)
         self.assertEqual(expl.unverified[0].reason, "no quote given")
+
+
+class LanguageTests(unittest.TestCase):
+    def test_detect_letter_languages(self):
+        for l in E.load_letters():
+            with self.subTest(l["id"]):
+                self.assertEqual(LC.detect(l["text"]), l["lang"])
+
+    def test_in_language(self):
+        self.assertTrue(LC.in_language("Податкове управління нагадує про сплату", "uk"))
+        self.assertFalse(LC.in_language("Die Stadtpolizei hat eine Busse erhoben und Sie müssen bis", "uk"))
+        self.assertFalse(LC.in_language("Il comune ha inflitto una multa che deve essere pagata entro", "en"))
+        self.assertTrue(LC.in_language("You must pay the fine by the date in the letter and it is", "en"))
+        self.assertIsNone(LC.in_language("CHF 40.00", "en"))
+
+
+class _FakeLLM:
+    """Stands in for the model: returns the queued replies in order and records the calls."""
+
+    def __init__(self, *texts):
+        self.texts, self.calls = list(texts), []
+
+    def chat(self, messages, **kw):
+        self.calls.append(messages)
+        return Reply(text=self.texts.pop(0), prompt_tokens=10, completion_tokens=5, seconds=1.0,
+                     output_mode="json_schema")
+
+
+class ExplainSeamTests(unittest.TestCase):
+    LETTER = "Musterstadt, 1. Oktober 2026\n\nBitte bezahlen Sie CHF 40.00 bis zum 30. November 2026 und senden Sie das Formular."
+
+    def _reply(self, summary, text):
+        return json.dumps({"summary": summary, "letter_language": "de", "deadlines": [
+            {"date": "2026-11-30", "text": text, "quote": "bis zum 30. November 2026"}]}, ensure_ascii=False)
+
+    def test_wrong_language_is_retried_once_and_fixed(self):
+        llm = _FakeLLM(self._reply("Sie müssen die Busse bezahlen und das Formular senden.", "bezahlen bis"),
+                       self._reply("Ви повинні сплатити штраф і надіслати форму.", "сплатити до"))
+        res = explain(self.LETTER, "uk", llm)
+        self.assertTrue(res.retried)
+        self.assertTrue(res.language_ok)
+        self.assertEqual(len(llm.calls), 2)
+        self.assertIn("Rewrite the same JSON", llm.calls[1][-1]["content"])
+        self.assertEqual(res.explanation.shown[0].date, "2026-11-30")
+        self.assertEqual(res.seconds, 2.0)
+
+    def test_right_language_is_not_retried(self):
+        llm = _FakeLLM(self._reply("You must pay the fine and send the form by the date.", "pay by"))
+        res = explain(self.LETTER, "en", llm)
+        self.assertFalse(res.retried)
+        self.assertTrue(res.language_ok)
+        self.assertEqual(len(llm.calls), 1)
+
+    def test_still_wrong_after_retry_is_reported_not_hidden(self):
+        wrong = self._reply("Sie müssen die Busse bezahlen und das Formular senden.", "bezahlen bis")
+        res = explain(self.LETTER, "uk", _FakeLLM(wrong, wrong))
+        self.assertTrue(res.retried)
+        self.assertFalse(res.language_ok)
+        self.assertEqual(len(res.explanation.shown), 1)   # the checked facts are still shown
+
+    def test_prompt_restates_reader_language_after_the_letter(self):
+        llm = _FakeLLM(self._reply("You must pay the fine and send the form by the date.", "pay by"))
+        explain(self.LETTER, "en", llm)
+        user = llm.calls[0][1]["content"]
+        self.assertGreater(user.rindex("English"), user.index(">>>"))
+        self.assertIn("The letter is in German", user)
 
 
 class DatasetTests(unittest.TestCase):

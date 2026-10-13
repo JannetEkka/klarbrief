@@ -6,6 +6,7 @@ import json
 import re
 from dataclasses import dataclass
 
+from . import langcheck as LC
 from . import verify as V
 from .llm import LLM, Reply
 
@@ -77,11 +78,21 @@ OUTPUT_SCHEMA = {
 }
 
 
-def build_messages(letter: str, target_lang: str) -> list[dict]:
+LETTER_LANGUAGE_NAMES = {"de": "German", "fr": "French", "it": "Italian", "en": "English", "rm": "Romansh"}
+
+
+def build_messages(letter: str, target_lang: str, letter_lang: str | None = None) -> list[dict]:
+    """The reader's language is stated before the letter and again after it: small models
+    otherwise drift into the letter's own language once they have read it."""
     lang = LANGUAGES.get(target_lang, target_lang)
+    source = LETTER_LANGUAGE_NAMES.get(letter_lang or "", "")
+    even = f" The letter is in {source}, but" if source and source.lower() not in lang.lower() else ""
     return [
         {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": f"Reader's language: {lang}\n\nLetter:\n<<<\n{letter.strip()}\n>>>"},
+        {"role": "user", "content": (
+            f"Reader's language: {lang}\n\nLetter:\n<<<\n{letter.strip()}\n>>>\n\n"
+            f"Reminder:{even} write the summary and every \"text\" value in {lang}. "
+            f"Keep every \"quote\" exactly as written in the letter.")},
     ]
 
 
@@ -106,6 +117,12 @@ class Result:
     json_ok: bool
     reply: Reply | None
     error: str | None = None
+    language_ok: bool | None = None      # reply in the reader's language? None = cannot tell
+    retried: bool = False                # a second call asked for the reader's language
+    first_raw_text: str | None = None    # the first reply, when it was retried
+    seconds: float = 0.0                 # all calls together
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
 
     def to_dict(self) -> dict:
         return {
@@ -113,9 +130,11 @@ class Result:
             "error": self.error,
             "explanation": self.explanation.to_dict() if self.explanation else None,
             "raw_text": self.raw_text,
-            "prompt_tokens": self.reply.prompt_tokens if self.reply else 0,
-            "completion_tokens": self.reply.completion_tokens if self.reply else 0,
-            "seconds": self.reply.seconds if self.reply else 0,
+            "language_ok": self.language_ok,
+            "retried": self.retried,
+            "prompt_tokens": self.prompt_tokens,
+            "completion_tokens": self.completion_tokens,
+            "seconds": round(self.seconds, 2),
             "output_mode": self.reply.output_mode if self.reply else None,
         }
 
@@ -134,7 +153,35 @@ def from_model_text(raw: str, letter: str, target_lang: str) -> tuple[V.Explanat
                          points=points), True
 
 
+def language_of_reply(raw: str, target_lang: str) -> bool | None:
+    data = parse_json(raw)
+    return LC.in_language(LC.explanation_text(data), target_lang) if data else None
+
+
 def explain(letter: str, target_lang: str, llm: LLM, *, seed: int | None = 0) -> Result:
-    reply = llm.chat(build_messages(letter, target_lang), schema=OUTPUT_SCHEMA, seed=seed)
-    expl, ok = from_model_text(reply.text, letter, target_lang)
-    return Result(expl, reply.text, ok, reply, None if ok else "reply was not valid JSON")
+    """One call; if the reply is clearly not in the reader's language, one more call that asks
+    for a rewrite (same quotes, dates and amounts). The result says whether the language is
+    right, so the UI can tell the reader instead of hiding it."""
+    messages = build_messages(letter, target_lang, LC.detect(letter))
+    reply = llm.chat(messages, schema=OUTPUT_SCHEMA, seed=seed)
+    raw, first, lang_ok, retried = reply.text, None, language_of_reply(reply.text, target_lang), False
+    seconds, p_tok, c_tok = reply.seconds, reply.prompt_tokens, reply.completion_tokens
+    if lang_ok is False:
+        name = LANGUAGES.get(target_lang, target_lang)
+        retry = messages + [
+            {"role": "assistant", "content": reply.text},
+            {"role": "user", "content": (
+                f"Your reply is not in {name}. Rewrite the same JSON with the summary and every "
+                f"\"text\" value in {name}. Keep every \"quote\", date and amount exactly as they are.")}]
+        second = llm.chat(retry, schema=OUTPUT_SCHEMA, seed=seed)
+        seconds += second.seconds
+        p_tok += second.prompt_tokens
+        c_tok += second.completion_tokens
+        retried = True
+        if parse_json(second.text) is not None:
+            first, raw, reply = reply.text, second.text, second
+            lang_ok = language_of_reply(second.text, target_lang)
+    expl, ok = from_model_text(raw, letter, target_lang)
+    return Result(expl, raw, ok, reply, None if ok else "reply was not valid JSON",
+                  language_ok=lang_ok, retried=retried, first_raw_text=first,
+                  seconds=seconds, prompt_tokens=p_tok, completion_tokens=c_tok)

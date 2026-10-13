@@ -14,7 +14,7 @@ from importlib import resources
 from pathlib import Path
 
 from . import evaluate as E
-from .explain import LANGUAGES, explain, from_model_text
+from .explain import LANGUAGES, explain, from_model_text, language_of_reply
 from .llm import LLM, LLMError, Settings
 
 MAX_LETTER_CHARS = 12000
@@ -71,6 +71,8 @@ class App:
         expl, ok = from_model_text(rec["raw_text"], letter, lang)
         return 200, {"mode": "replay", "model": rec["model"], "recorded_at": rec.get("recorded_at"),
                      "json_ok": ok, "explanation": expl.to_dict() if expl else None,
+                     "language_ok": rec.get("language_ok", language_of_reply(rec["raw_text"], lang)),
+                     "retried": rec.get("retried", False),
                      "raw_text": rec["raw_text"], "seconds": rec.get("seconds"),
                      "prompt_tokens": rec.get("prompt_tokens"),
                      "completion_tokens": rec.get("completion_tokens")}
