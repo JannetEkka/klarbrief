@@ -20,6 +20,11 @@ from . import evaluate as E
 from .explain import LANGUAGES, explain
 from .llm import LLM, LLMError, Settings
 
+RUN_LABELS = {  # comparison runs kept in data/results, named by what they tested
+    "ablation-json-object": "ablation: plain JSON mode",
+    "ablation-language-once": "ablation: schema, language stated once",
+}
+
 KIND_LABEL = {"sender": "From", "topic": "About", "action": "What to do", "deadline": "By when",
               "amount": "How much", "consequence": "If you don't", "contact": "Contact"}
 
@@ -39,27 +44,27 @@ def _print_explanation(d: dict) -> None:
 
 
 def _scores_table(paths: list[Path]) -> str:
-    rows = ["| Model · letters · reader languages · output | Replies | JSON valid | Points grounded | Deadlines shown (P / R) "
+    rows = ["| Model · letters · reader languages · output | Replies | JSON valid | In reader's language | Points grounded | Deadlines shown (P / R) "
             "| Amounts shown (P / R) | Invented deadlines raw → shown | Wrong dates raw → shown | s / letter |",
-            "|---|---|---|---|---|---|---|---|---|"]
+            "|---|---|---|---|---|---|---|---|---|---|"]
     split_of = {l["id"]: l.get("split", "dev") for l in E.load_letters()}
     groups = []
     for path in paths:
         recs = E.read_jsonl(path)
+        label = RUN_LABELS.get(path.name.split("-apertus")[0], "final pipeline")
         splits = sorted({split_of.get(r["letter_id"], "dev") for r in recs})
         for split in splits:
-            groups.append((split, [r for r in recs if split_of.get(r["letter_id"], "dev") == split]))
-    for split, recs in groups:
+            groups.append((split, label, [r for r in recs if split_of.get(r["letter_id"], "dev") == split]))
+    for split, label, recs in groups:
         if not recs:
             continue
         s = E.score_records(recs)["summary"]
         langs = ",".join(sorted({r["target_lang"] for r in recs}))
-        mode = "plain JSON mode" if recs[0].get("json_mode") is not None and "output_mode" not in recs[0] else "schema"
-        langs = f"{split} letters · {langs} · {mode}"
+        langs = f"{split} letters · {langs} · {label}"
         inv = s["invented_deadline_on_no_deadline_letters"]
         wr, ws = s["wrong_dates_raw"], s["wrong_dates_shown"]
         rows.append(
-            f"| {recs[0]['model']} · {langs} | {s['replies']} | {s['json_valid']:.0%} | {s['grounded_share']:.0%} "
+            f"| {recs[0]['model']} · {langs} | {s['replies']} | {s['json_valid']:.0%} | {s['in_reader_language']} | {s['grounded_share']:.0%} "
             f"| {s['deadlines_shown']['precision']:.2f} / {s['deadlines_shown']['recall']:.2f} "
             f"| {s['amounts_shown']['precision']:.2f} / {s['amounts_shown']['recall']:.2f} "
             f"| {inv['raw']} → {inv['shown']} of {inv['of']} "
