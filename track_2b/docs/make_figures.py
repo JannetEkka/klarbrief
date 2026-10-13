@@ -96,9 +96,12 @@ def main() -> None:
            "by_language": {}}
     for lang in sorted({r["target_lang"] for r in main_recs}):
         out["by_language"][lang] = E.score_records([r for r in main_recs if r["target_lang"] == lang])["summary"]
+    split_of = {l["id"]: l.get("split", "dev") for l in E.load_letters()}
+    out["by_split"] = {sp: E.score_records([r for r in main_recs if split_of[r["letter_id"]] == sp])["summary"]
+                       for sp in sorted({split_of[r["letter_id"]] for r in main_recs})}
     for lang_letter in ("de", "fr", "it"):
         out["by_language"]["letters_" + lang_letter] = E.score_records(
-            [r for r in main_recs if r["letter_id"].startswith(lang_letter)])["summary"]
+            [r for r in main_recs if r["letter_id"].split("-")[-2] == lang_letter])["summary"]
     (ROOT / "docs" / "results.json").write_text(json.dumps(out, indent=1, ensure_ascii=False))
     print(json.dumps({k: out[k] for k in ("main", "consistency")}, indent=1, ensure_ascii=False))
 

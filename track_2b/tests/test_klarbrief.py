@@ -137,6 +137,25 @@ class VerifyTests(unittest.TestCase):
         self.assertFalse(p.verified)
         self.assertIn("CHF 59.00", p.reason)
 
+    def test_mixed_language_deadline_quote_is_found_by_its_date(self):
+        letter = "Bitte begleichen Sie den Betrag bis zum 30. November 2026 mit dem beiliegenden Einzahlungsschein."
+        p = V.verify(V.points_from_model({"deadlines": [{"date": "2026-11-30", "text": "pay",
+            "quote": "bis zum 30. November 2026 with the enclosed deposit slip."}]}), letter)[0]
+        self.assertTrue(p.verified, p.reason)
+        self.assertIn("30. November 2026", p.evidence)
+
+    def test_reworded_deadline_quote_needs_the_same_date(self):
+        letter = "Il nuovo termine è il 31 gennaio 2027. Non verranno concesse ulteriori proroghe."
+        ok = V.verify(V.points_from_model({"deadlines": [{"date": "2027-01-31", "text": "x", "quote": "entro il 31 gennaio 2027"}]}), letter)[0]
+        bad = V.verify(V.points_from_model({"deadlines": [{"date": "2027-02-28", "text": "x", "quote": "entro il 28 febbraio 2027"}]}), letter)[0]
+        self.assertTrue(ok.verified, ok.reason)
+        self.assertFalse(bad.verified)
+
+    def test_short_overlap_does_not_rescue_an_action(self):
+        letter = "Il nuovo termine è il 31 gennaio 2027."
+        p = V.verify(V.points_from_model({"actions": [{"text": "x", "quote": "entro il 31 gennaio 2027"}]}), letter)[0]
+        self.assertFalse(p.verified)
+
     def test_too_short_quote_rejected(self):
         p = self._one(_kind="actions", text="x", quote="die")
         self.assertFalse(p.verified)

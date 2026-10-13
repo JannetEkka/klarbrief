@@ -30,6 +30,7 @@ NEAR_MATCH = 0.90
 MIN_QUOTE_CHARS = 4
 PARTIAL_SHARE = 0.60      # a verbatim stretch covering at least 60% of the quote ...
 PARTIAL_MIN_CHARS = 20    # ... and at least 20 characters long
+TYPED_MIN_CHARS = 12      # deadline/amount: any verbatim stretch this long that holds the value
 
 _TRANSLATE = str.maketrans({
     "’": "'", "‘": "'", "‚": "'", "`": "'", "´": "'",
@@ -91,8 +92,11 @@ class Match:
         return letter[self.start:self.end]
 
 
-def locate(quote: str, letter: str, letter_norm: tuple[str, list[int]] | None = None) -> Match | None:
+def locate(quote: str, letter: str, letter_norm: tuple[str, list[int]] | None = None, *,
+           partial_share: float = None, partial_min: int = None) -> Match | None:
     """Find ``quote`` in ``letter``. Returns offsets in the original letter, or None."""
+    partial_share = PARTIAL_SHARE if partial_share is None else partial_share
+    partial_min = PARTIAL_MIN_CHARS if partial_min is None else partial_min
     q = normalise(_strip_quote(quote))
     if len(q) < MIN_QUOTE_CHARS:
         return None
@@ -122,7 +126,7 @@ def locate(quote: str, letter: str, letter_norm: tuple[str, list[int]] | None = 
         return Match(index[s0], index[e0 - 1] + 1, "near", round(max(ratio, best[0]), 3))
     # Partial: the model paraphrased part of the quote, but a long stretch of it is verbatim.
     lm = difflib.SequenceMatcher(None, norm, q, autojunk=False).find_longest_match(0, len(norm), 0, n)
-    if lm.size >= max(PARTIAL_MIN_CHARS, PARTIAL_SHARE * n):
+    if lm.size >= max(partial_min, partial_share * n):
         s0, e0 = lm.a, lm.a + lm.size
         while s0 < e0 and not norm[s0].isalnum():   # trim to whole words
             s0 += 1
@@ -133,7 +137,7 @@ def locate(quote: str, letter: str, letter_norm: tuple[str, list[int]] | None = 
                 s0 += 1
         while e0 < len(norm) and norm[e0].isalnum():
             e0 += 1
-        if e0 - s0 >= PARTIAL_MIN_CHARS:
+        if e0 - s0 >= partial_min:
             return Match(index[s0], index[e0 - 1] + 1, "partial", round(lm.size / n, 3))
     return None
 
@@ -244,6 +248,17 @@ def points_from_model(data: dict) -> list[Point]:
     return pts
 
 
+def _value_in(p: Point, text: str) -> bool:
+    """Does ``text`` (letter words) itself contain the point's date or CHF amount?"""
+    if p.kind == "deadline" and p.date:
+        return p.date in {d.isoformat() for d in parse.find_dates(text)}
+    if p.kind == "deadline":
+        return len(parse.find_dates(text)) == 1
+    if p.kind == "amount" and p.chf is not None:
+        return p.chf in parse.find_amounts(text)
+    return False
+
+
 def verify(points: list[Point], letter: str) -> list[Point]:
     letter_norm = normalise_with_map(letter)
     written_on = parse.letter_date(letter)
@@ -252,6 +267,13 @@ def verify(points: list[Point], letter: str) -> list[Point]:
             p.reason = "no quote given"
             continue
         m = locate(p.quote, letter, letter_norm)
+        if m is None and p.kind in ("deadline", "amount"):
+            # For a deadline or an amount the fact that matters is the date or the number.
+            # Accept a shorter verbatim stretch of the quote (mixed-language or re-worded
+            # quotes), provided the date / amount check below finds the value in it.
+            m = locate(p.quote, letter, letter_norm, partial_share=0.0, partial_min=TYPED_MIN_CHARS)
+            if m is not None and not _value_in(p, letter[m.start:m.end]):
+                m = None
         if m is None:
             p.reason = "quote not found in the letter"
             continue

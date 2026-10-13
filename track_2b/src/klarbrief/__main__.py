@@ -39,15 +39,23 @@ def _print_explanation(d: dict) -> None:
 
 
 def _scores_table(paths: list[Path]) -> str:
-    rows = ["| Model · reader languages | Replies | JSON valid | Points grounded | Deadlines shown (P / R) "
+    rows = ["| Model · letters · reader languages · output | Replies | JSON valid | Points grounded | Deadlines shown (P / R) "
             "| Amounts shown (P / R) | Invented deadlines raw → shown | Wrong dates raw → shown | s / letter |",
             "|---|---|---|---|---|---|---|---|---|"]
+    split_of = {l["id"]: l.get("split", "dev") for l in E.load_letters()}
+    groups = []
     for path in paths:
         recs = E.read_jsonl(path)
+        splits = sorted({split_of.get(r["letter_id"], "dev") for r in recs})
+        for split in splits:
+            groups.append((split, [r for r in recs if split_of.get(r["letter_id"], "dev") == split]))
+    for split, recs in groups:
         if not recs:
             continue
         s = E.score_records(recs)["summary"]
         langs = ",".join(sorted({r["target_lang"] for r in recs}))
+        mode = "plain JSON mode" if recs[0].get("json_mode") is not None and "output_mode" not in recs[0] else "schema"
+        langs = f"{split} letters · {langs} · {mode}"
         inv = s["invented_deadline_on_no_deadline_letters"]
         wr, ws = s["wrong_dates_raw"], s["wrong_dates_shown"]
         rows.append(
