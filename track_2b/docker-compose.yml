@@ -1,0 +1,57 @@
+# Two ways to run Klarbrief.
+#
+# 1) `make run` (service `app`): the app talks to an Apertus endpoint given by
+#    LLM_BASE_URL / LLM_API_KEY / LLM_NAME, e.g. a Swiss-hosted endpoint (sovereign Swiss cloud).
+#    With no endpoint set, the UI replays recorded replies for the sample letters.
+#
+# 2) `make onprem` (profile `onprem`): Apertus 1.5 8B runs next to the app in a llama.cpp
+#    container on the same machine, CPU or GPU. The model server sits on an internal Docker
+#    network with no route to the internet; the model file is downloaded once at build time
+#    (`make model`) and mounted read-only.
+
+services:
+  app:
+    build: .
+    image: klarbrief:latest
+    ports:
+      - "${KLARBRIEF_PORT:-8000}:8000"
+    environment:
+      LLM_BASE_URL: ${LLM_BASE_URL:-}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_NAME: ${LLM_NAME:-}
+      PUBLICAI_API_KEY: ${PUBLICAI_API_KEY:-}
+
+  llm:
+    image: ghcr.io/ggml-org/llama.cpp:server
+    profiles: ["onprem"]
+    command: >
+      -m /models/apertus-v1.5-8b-text-q4_k_m.gguf
+      --host 0.0.0.0 --port 8080 -c 8192 --jinja
+      --alias apertus-v1.5-8b-text-q4_k_m
+    volumes:
+      - ./models:/models:ro
+    networks: [airgap]
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 60
+
+  app-onprem:
+    build: .
+    image: klarbrief:latest
+    profiles: ["onprem"]
+    depends_on:
+      llm:
+        condition: service_healthy
+    environment:
+      LLM_BASE_URL: http://llm:8080/v1
+      LLM_NAME: apertus-v1.5-8b-text-q4_k_m
+    ports:
+      - "${KLARBRIEF_PORT:-8000}:8000"
+    networks: [airgap, ui]
+
+networks:
+  airgap:
+    internal: true   # no route to the internet
+  ui: {}

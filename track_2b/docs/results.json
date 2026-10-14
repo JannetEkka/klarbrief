@@ -1,0 +1,642 @@
+{
+ "main": {
+  "replies": 48,
+  "json_valid": 1.0,
+  "in_reader_language_first_try": "48/48",
+  "in_reader_language": "48/48",
+  "retried_for_language": 0,
+  "points": 323,
+  "grounded_share": 0.907,
+  "exact_matches": 283,
+  "near_matches": 11,
+  "partial_matches": 3,
+  "deadlines_raw": {
+   "precision": 0.8,
+   "recall": 0.966,
+   "tp": 28,
+   "fp": 7,
+   "fn": 1
+  },
+  "deadlines_shown": {
+   "precision": 0.966,
+   "recall": 0.966,
+   "tp": 28,
+   "fp": 1,
+   "fn": 1
+  },
+  "amounts_raw": {
+   "precision": 0.946,
+   "recall": 0.7,
+   "tp": 35,
+   "fp": 2,
+   "fn": 15
+  },
+  "amounts_shown": {
+   "precision": 1.0,
+   "recall": 0.68,
+   "tp": 34,
+   "fp": 0,
+   "fn": 16
+  },
+  "amounts_surfaced": "44/50",
+  "wrong_dates_raw": {
+   "misread_from_letter": 7,
+   "not_in_letter": 0
+  },
+  "wrong_dates_shown": {
+   "misread_from_letter": 1,
+   "not_in_letter": 0
+  },
+  "invented_deadline_on_no_deadline_letters": {
+   "raw": 7,
+   "shown": 1,
+   "of": 19
+  },
+  "unverified_reasons": {
+   "quote not found in the letter": 24,
+   "no quote given": 2,
+   "date 2026-09-21 is not written in the quoted words": 1,
+   "date 2026-10-01 is not written in the quoted words": 1,
+   "CHF 0.00 is not written in the quoted words": 1,
+   "date 2026-10-14 is not written in the quoted words": 1
+  },
+  "mean_prompt_tokens": 794,
+  "mean_completion_tokens": 439,
+  "mean_seconds": 291.6
+ },
+ "consistency": {
+  "letters_compared": 20,
+  "same_deadlines": 19,
+  "same_amounts": 19
+ },
+ "ablation": {
+  "ablation-json-object-apertus-v1.5-8b-text-q4km-local.jsonl": {
+   "replies": 20,
+   "json_valid": 1.0,
+   "in_reader_language_first_try": "20/20",
+   "in_reader_language": "20/20",
+   "retried_for_language": 0,
+   "points": 132,
+   "grounded_share": 0.788,
+   "exact_matches": 104,
+   "near_matches": 2,
+   "partial_matches": 2,
+   "deadlines_raw": {
+    "precision": 0.636,
+    "recall": 0.583,
+    "tp": 7,
+    "fp": 4,
+    "fn": 5
+   },
+   "deadlines_shown": {
+    "precision": 1.0,
+    "recall": 0.583,
+    "tp": 7,
+    "fp": 0,
+    "fn": 5
+   },
+   "amounts_raw": {
+    "precision": 0.867,
+    "recall": 0.619,
+    "tp": 13,
+    "fp": 2,
+    "fn": 8
+   },
+   "amounts_shown": {
+    "precision": 1.0,
+    "recall": 0.619,
+    "tp": 13,
+    "fp": 0,
+    "fn": 8
+   },
+   "amounts_surfaced": "16/21",
+   "wrong_dates_raw": {
+    "misread_from_letter": 2,
+    "not_in_letter": 2
+   },
+   "wrong_dates_shown": {
+    "misread_from_letter": 0,
+    "not_in_letter": 0
+   },
+   "invented_deadline_on_no_deadline_letters": {
+    "raw": 3,
+    "shown": 0,
+    "of": 8
+   },
+   "unverified_reasons": {
+    "no quote given": 14,
+    "quote not found in the letter": 10,
+    "date 2026-12-21 is not written in the quoted words": 1,
+    "date 2026-03-31 is before the letter's own date (2026-10-12), so it has already passed": 1,
+    "date 2026-10-09 is not written in the quoted words": 1,
+    "date 2026-12-19 is not written in the quoted words": 1
+   },
+   "mean_prompt_tokens": 760,
+   "mean_completion_tokens": 370,
+   "mean_seconds": 317.7
+  },
+  "ablation-language-once-apertus-v1.5-8b-text-q4km-local.jsonl": {
+   "replies": 48,
+   "json_valid": 1.0,
+   "in_reader_language_first_try": "35/48",
+   "in_reader_language": "35/48",
+   "retried_for_language": 0,
+   "points": 320,
+   "grounded_share": 0.919,
+   "exact_matches": 278,
+   "near_matches": 11,
+   "partial_matches": 7,
+   "deadlines_raw": {
+    "precision": 0.848,
+    "recall": 0.966,
+    "tp": 28,
+    "fp": 5,
+    "fn": 1
+   },
+   "deadlines_shown": {
+    "precision": 0.933,
+    "recall": 0.966,
+    "tp": 28,
+    "fp": 2,
+    "fn": 1
+   },
+   "amounts_raw": {
+    "precision": 1.0,
+    "recall": 0.72,
+    "tp": 36,
+    "fp": 0,
+    "fn": 14
+   },
+   "amounts_shown": {
+    "precision": 1.0,
+    "recall": 0.72,
+    "tp": 36,
+    "fp": 0,
+    "fn": 14
+   },
+   "amounts_surfaced": "48/50",
+   "wrong_dates_raw": {
+    "misread_from_letter": 4,
+    "not_in_letter": 1
+   },
+   "wrong_dates_shown": {
+    "misread_from_letter": 2,
+    "not_in_letter": 0
+   },
+   "invented_deadline_on_no_deadline_letters": {
+    "raw": 5,
+    "shown": 2,
+    "of": 19
+   },
+   "unverified_reasons": {
+    "quote not found in the letter": 23,
+    "date 2026-09-21 is not written in the quoted words": 1,
+    "no quote given": 1,
+    "date 2026-11-19 is not written in the quoted words": 1
+   },
+   "mean_prompt_tokens": 757,
+   "mean_completion_tokens": 434,
+   "mean_seconds": 298.7
+  }
+ },
+ "by_language": {
+  "en": {
+   "replies": 28,
+   "json_valid": 1.0,
+   "in_reader_language_first_try": "28/28",
+   "in_reader_language": "28/28",
+   "retried_for_language": 0,
+   "points": 189,
+   "grounded_share": 0.899,
+   "exact_matches": 164,
+   "near_matches": 7,
+   "partial_matches": 1,
+   "deadlines_raw": {
+    "precision": 0.8,
+    "recall": 0.941,
+    "tp": 16,
+    "fp": 4,
+    "fn": 1
+   },
+   "deadlines_shown": {
+    "precision": 0.941,
+    "recall": 0.941,
+    "tp": 16,
+    "fp": 1,
+    "fn": 1
+   },
+   "amounts_raw": {
+    "precision": 0.955,
+    "recall": 0.724,
+    "tp": 21,
+    "fp": 1,
+    "fn": 8
+   },
+   "amounts_shown": {
+    "precision": 1.0,
+    "recall": 0.69,
+    "tp": 20,
+    "fp": 0,
+    "fn": 9
+   },
+   "amounts_surfaced": "26/29",
+   "wrong_dates_raw": {
+    "misread_from_letter": 4,
+    "not_in_letter": 0
+   },
+   "wrong_dates_shown": {
+    "misread_from_letter": 1,
+    "not_in_letter": 0
+   },
+   "invented_deadline_on_no_deadline_letters": {
+    "raw": 4,
+    "shown": 1,
+    "of": 11
+   },
+   "unverified_reasons": {
+    "quote not found in the letter": 17,
+    "date 2026-09-21 is not written in the quoted words": 1,
+    "date 2026-10-14 is not written in the quoted words": 1
+   },
+   "mean_prompt_tokens": 786,
+   "mean_completion_tokens": 411,
+   "mean_seconds": 277.5
+  },
+  "uk": {
+   "replies": 20,
+   "json_valid": 1.0,
+   "in_reader_language_first_try": "20/20",
+   "in_reader_language": "20/20",
+   "retried_for_language": 0,
+   "points": 134,
+   "grounded_share": 0.918,
+   "exact_matches": 119,
+   "near_matches": 4,
+   "partial_matches": 2,
+   "deadlines_raw": {
+    "precision": 0.8,
+    "recall": 1.0,
+    "tp": 12,
+    "fp": 3,
+    "fn": 0
+   },
+   "deadlines_shown": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "tp": 12,
+    "fp": 0,
+    "fn": 0
+   },
+   "amounts_raw": {
+    "precision": 0.933,
+    "recall": 0.667,
+    "tp": 14,
+    "fp": 1,
+    "fn": 7
+   },
+   "amounts_shown": {
+    "precision": 1.0,
+    "recall": 0.667,
+    "tp": 14,
+    "fp": 0,
+    "fn": 7
+   },
+   "amounts_surfaced": "18/21",
+   "wrong_dates_raw": {
+    "misread_from_letter": 3,
+    "not_in_letter": 0
+   },
+   "wrong_dates_shown": {
+    "misread_from_letter": 0,
+    "not_in_letter": 0
+   },
+   "invented_deadline_on_no_deadline_letters": {
+    "raw": 3,
+    "shown": 0,
+    "of": 8
+   },
+   "unverified_reasons": {
+    "quote not found in the letter": 7,
+    "no quote given": 2,
+    "date 2026-10-01 is not written in the quoted words": 1,
+    "CHF 0.00 is not written in the quoted words": 1
+   },
+   "mean_prompt_tokens": 805,
+   "mean_completion_tokens": 478,
+   "mean_seconds": 311.3
+  },
+  "letters_de": {
+   "replies": 19,
+   "json_valid": 1.0,
+   "in_reader_language_first_try": "19/19",
+   "in_reader_language": "19/19",
+   "retried_for_language": 0,
+   "points": 129,
+   "grounded_share": 0.93,
+   "exact_matches": 116,
+   "near_matches": 5,
+   "partial_matches": 1,
+   "deadlines_raw": {
+    "precision": 0.8,
+    "recall": 1.0,
+    "tp": 12,
+    "fp": 3,
+    "fn": 0
+   },
+   "deadlines_shown": {
+    "precision": 0.923,
+    "recall": 1.0,
+    "tp": 12,
+    "fp": 1,
+    "fn": 0
+   },
+   "amounts_raw": {
+    "precision": 1.0,
+    "recall": 0.625,
+    "tp": 15,
+    "fp": 0,
+    "fn": 9
+   },
+   "amounts_shown": {
+    "precision": 1.0,
+    "recall": 0.625,
+    "tp": 15,
+    "fp": 0,
+    "fn": 9
+   },
+   "amounts_surfaced": "20/24",
+   "wrong_dates_raw": {
+    "misread_from_letter": 3,
+    "not_in_letter": 0
+   },
+   "wrong_dates_shown": {
+    "misread_from_letter": 1,
+    "not_in_letter": 0
+   },
+   "invented_deadline_on_no_deadline_letters": {
+    "raw": 3,
+    "shown": 1,
+    "of": 7
+   },
+   "unverified_reasons": {
+    "quote not found in the letter": 6,
+    "date 2026-09-21 is not written in the quoted words": 1,
+    "no quote given": 1,
+    "date 2026-10-01 is not written in the quoted words": 1
+   },
+   "mean_prompt_tokens": 812,
+   "mean_completion_tokens": 475,
+   "mean_seconds": 328.9
+  },
+  "letters_fr": {
+   "replies": 15,
+   "json_valid": 1.0,
+   "in_reader_language_first_try": "15/15",
+   "in_reader_language": "15/15",
+   "retried_for_language": 0,
+   "points": 101,
+   "grounded_share": 0.851,
+   "exact_matches": 83,
+   "near_matches": 4,
+   "partial_matches": 0,
+   "deadlines_raw": {
+    "precision": 0.818,
+    "recall": 0.9,
+    "tp": 9,
+    "fp": 2,
+    "fn": 1
+   },
+   "deadlines_shown": {
+    "precision": 1.0,
+    "recall": 0.9,
+    "tp": 9,
+    "fp": 0,
+    "fn": 1
+   },
+   "amounts_raw": {
+    "precision": 0.818,
+    "recall": 0.692,
+    "tp": 9,
+    "fp": 2,
+    "fn": 4
+   },
+   "amounts_shown": {
+    "precision": 1.0,
+    "recall": 0.692,
+    "tp": 9,
+    "fp": 0,
+    "fn": 4
+   },
+   "amounts_surfaced": "12/13",
+   "wrong_dates_raw": {
+    "misread_from_letter": 2,
+    "not_in_letter": 0
+   },
+   "wrong_dates_shown": {
+    "misread_from_letter": 0,
+    "not_in_letter": 0
+   },
+   "invented_deadline_on_no_deadline_letters": {
+    "raw": 2,
+    "shown": 0,
+    "of": 5
+   },
+   "unverified_reasons": {
+    "quote not found in the letter": 13,
+    "no quote given": 1,
+    "CHF 0.00 is not written in the quoted words": 1
+   },
+   "mean_prompt_tokens": 786,
+   "mean_completion_tokens": 412,
+   "mean_seconds": 270.7
+  },
+  "letters_it": {
+   "replies": 14,
+   "json_valid": 1.0,
+   "in_reader_language_first_try": "14/14",
+   "in_reader_language": "14/14",
+   "retried_for_language": 0,
+   "points": 93,
+   "grounded_share": 0.935,
+   "exact_matches": 84,
+   "near_matches": 2,
+   "partial_matches": 2,
+   "deadlines_raw": {
+    "precision": 0.778,
+    "recall": 1.0,
+    "tp": 7,
+    "fp": 2,
+    "fn": 0
+   },
+   "deadlines_shown": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "tp": 7,
+    "fp": 0,
+    "fn": 0
+   },
+   "amounts_raw": {
+    "precision": 1.0,
+    "recall": 0.846,
+    "tp": 11,
+    "fp": 0,
+    "fn": 2
+   },
+   "amounts_shown": {
+    "precision": 1.0,
+    "recall": 0.769,
+    "tp": 10,
+    "fp": 0,
+    "fn": 3
+   },
+   "amounts_surfaced": "12/13",
+   "wrong_dates_raw": {
+    "misread_from_letter": 2,
+    "not_in_letter": 0
+   },
+   "wrong_dates_shown": {
+    "misread_from_letter": 0,
+    "not_in_letter": 0
+   },
+   "invented_deadline_on_no_deadline_letters": {
+    "raw": 2,
+    "shown": 0,
+    "of": 7
+   },
+   "unverified_reasons": {
+    "quote not found in the letter": 5,
+    "date 2026-10-14 is not written in the quoted words": 1
+   },
+   "mean_prompt_tokens": 777,
+   "mean_completion_tokens": 419,
+   "mean_seconds": 263.4
+  }
+ },
+ "by_split": {
+  "dev": {
+   "replies": 40,
+   "json_valid": 1.0,
+   "in_reader_language_first_try": "40/40",
+   "in_reader_language": "40/40",
+   "retried_for_language": 0,
+   "points": 270,
+   "grounded_share": 0.915,
+   "exact_matches": 239,
+   "near_matches": 9,
+   "partial_matches": 2,
+   "deadlines_raw": {
+    "precision": 0.8,
+    "recall": 1.0,
+    "tp": 24,
+    "fp": 6,
+    "fn": 0
+   },
+   "deadlines_shown": {
+    "precision": 0.96,
+    "recall": 1.0,
+    "tp": 24,
+    "fp": 1,
+    "fn": 0
+   },
+   "amounts_raw": {
+    "precision": 0.935,
+    "recall": 0.69,
+    "tp": 29,
+    "fp": 2,
+    "fn": 13
+   },
+   "amounts_shown": {
+    "precision": 1.0,
+    "recall": 0.69,
+    "tp": 29,
+    "fp": 0,
+    "fn": 13
+   },
+   "amounts_surfaced": "37/42",
+   "wrong_dates_raw": {
+    "misread_from_letter": 6,
+    "not_in_letter": 0
+   },
+   "wrong_dates_shown": {
+    "misread_from_letter": 1,
+    "not_in_letter": 0
+   },
+   "invented_deadline_on_no_deadline_letters": {
+    "raw": 6,
+    "shown": 1,
+    "of": 16
+   },
+   "unverified_reasons": {
+    "quote not found in the letter": 18,
+    "no quote given": 2,
+    "date 2026-09-21 is not written in the quoted words": 1,
+    "date 2026-10-01 is not written in the quoted words": 1,
+    "CHF 0.00 is not written in the quoted words": 1
+   },
+   "mean_prompt_tokens": 800,
+   "mean_completion_tokens": 445,
+   "mean_seconds": 299.7
+  },
+  "heldout": {
+   "replies": 8,
+   "json_valid": 1.0,
+   "in_reader_language_first_try": "8/8",
+   "in_reader_language": "8/8",
+   "retried_for_language": 0,
+   "points": 53,
+   "grounded_share": 0.868,
+   "exact_matches": 44,
+   "near_matches": 2,
+   "partial_matches": 1,
+   "deadlines_raw": {
+    "precision": 0.8,
+    "recall": 0.8,
+    "tp": 4,
+    "fp": 1,
+    "fn": 1
+   },
+   "deadlines_shown": {
+    "precision": 1.0,
+    "recall": 0.8,
+    "tp": 4,
+    "fp": 0,
+    "fn": 1
+   },
+   "amounts_raw": {
+    "precision": 1.0,
+    "recall": 0.75,
+    "tp": 6,
+    "fp": 0,
+    "fn": 2
+   },
+   "amounts_shown": {
+    "precision": 1.0,
+    "recall": 0.625,
+    "tp": 5,
+    "fp": 0,
+    "fn": 3
+   },
+   "amounts_surfaced": "7/8",
+   "wrong_dates_raw": {
+    "misread_from_letter": 1,
+    "not_in_letter": 0
+   },
+   "wrong_dates_shown": {
+    "misread_from_letter": 0,
+    "not_in_letter": 0
+   },
+   "invented_deadline_on_no_deadline_letters": {
+    "raw": 1,
+    "shown": 0,
+    "of": 3
+   },
+   "unverified_reasons": {
+    "quote not found in the letter": 6,
+    "date 2026-10-14 is not written in the quoted words": 1
+   },
+   "mean_prompt_tokens": 764,
+   "mean_completion_tokens": 410,
+   "mean_seconds": 251.4
+  }
+ }
+}

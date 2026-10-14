@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1310 560" width="1310" height="560" font-family="DejaVu Sans, Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#555"/>
+    </marker>
+  </defs>
+  <rect width="1310" height="560" fill="#ffffff"/>
+
+  <!-- app bracket -->
+  <rect x="262" y="14" width="1040" height="290" rx="14" fill="none" stroke="#c8261b" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="280" y="40" font-size="16" font-weight="bold" fill="#c8261b">Klarbrief app · one container · Python standard library only</text>
+
+  <!-- Letter -->
+  <rect x="20" y="70" width="210" height="130" rx="10" fill="#f4f1ec" stroke="#b9b2a6"/>
+  <text x="125" y="105" text-anchor="middle" font-size="17" font-weight="bold">Letter</text>
+  <text x="125" y="132" text-anchor="middle" font-size="14">from an authority, in</text>
+  <text x="125" y="152" text-anchor="middle" font-size="14">German, French or Italian</text>
+  <text x="125" y="178" text-anchor="middle" font-size="14">+ the reader's language</text>
+  <line x1="230" y1="135" x2="276" y2="135" stroke="#555" stroke-width="2" marker-end="url(#a)"/>
+
+  <!-- 1 Prompt -->
+  <rect x="280" y="70" width="230" height="130" rx="10" fill="#fff" stroke="#888"/>
+  <text x="295" y="98" font-size="15" font-weight="bold">1 · Prompt</text>
+  <text x="295" y="124" font-size="13">Explain in the reader's</text>
+  <text x="295" y="144" font-size="13">language; every point quotes</text>
+  <text x="295" y="164" font-size="13">the letter word for word;</text>
+  <text x="295" y="184" font-size="13">reply with JSON only</text>
+
+  <!-- 2 Points -->
+  <rect x="540" y="70" width="230" height="130" rx="10" fill="#fff" stroke="#888"/>
+  <text x="555" y="98" font-size="15" font-weight="bold">2 · Points</text>
+  <text x="555" y="124" font-size="13">action · deadline (date)</text>
+  <text x="555" y="144" font-size="13">amount (CHF) · consequence</text>
+  <text x="555" y="164" font-size="13">contact · sender · topic,</text>
+  <text x="555" y="184" font-size="13">each with its quote</text>
+  <line x1="770" y1="135" x2="796" y2="135" stroke="#555" stroke-width="2" marker-end="url(#a)"/>
+
+  <!-- 3 Verifier -->
+  <rect x="800" y="56" width="490" height="232" rx="10" fill="#fff" stroke="#888"/>
+  <text x="815" y="84" font-size="15" font-weight="bold">3 · Verifier (deterministic, no model)</text>
+  <text x="815" y="112" font-size="13">a. Find the quote in the letter: exact after normalising spaces, quote</text>
+  <text x="832" y="131" font-size="13">marks, dashes and case, or a near match of at least 90 %.</text>
+  <text x="815" y="158" font-size="13">b. A deadline's date and an amount's CHF value must be written in</text>
+  <text x="832" y="177" font-size="13">those words of the letter (a "within 30 days" deadline has no date).</text>
+  <text x="815" y="204" font-size="13">c. The evidence displayed is the letter's own words at that position,</text>
+  <text x="832" y="223" font-size="13">never the model's copy of them.</text>
+  <text x="815" y="250" font-size="13">d. Anything that fails keeps its reason and is not shown as fact.</text>
+
+  <!-- Apertus -->
+  <rect x="280" y="360" width="490" height="170" rx="12" fill="#fff6f5" stroke="#c8261b" stroke-width="1.5"/>
+  <text x="525" y="390" text-anchor="middle" font-size="17" font-weight="bold">Apertus 1.5 · OpenAI-compatible chat API</text>
+  <text x="300" y="422" font-size="13.5" font-weight="bold">a/b On-premise, air-gapped</text>
+  <text x="300" y="443" font-size="13">llama.cpp container next to the app,</text>
+  <text x="300" y="462" font-size="13">on an internal network, no internet;</text>
+  <text x="300" y="481" font-size="13">8B, 5 GB model file, CPU or GPU</text>
+  <text x="600" y="422" font-size="13.5" font-weight="bold">c Swiss cloud</text>
+  <text x="600" y="443" font-size="13">any Swiss-hosted Apertus</text>
+  <text x="600" y="462" font-size="13">endpoint, set with three</text>
+  <text x="600" y="481" font-size="13">environment variables</text>
+  <line x1="395" y1="200" x2="395" y2="355" stroke="#555" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="655" y1="355" x2="655" y2="204" stroke="#555" stroke-width="2" marker-end="url(#a)"/>
+  <text x="405" y="300" font-size="12" fill="#555">letter + language</text>
+  <text x="665" y="300" font-size="12" fill="#555">JSON reply</text>
+
+  <!-- outputs -->
+  <rect x="800" y="360" width="235" height="110" rx="10" fill="#e6f1e8" stroke="#2f6b3a"/>
+  <text x="815" y="388" font-size="15" font-weight="bold" fill="#2f6b3a">Shown: ✓ in letter</text>
+  <text x="815" y="412" font-size="13">the explanation, with the</text>
+  <text x="815" y="431" font-size="13">letter's words highlighted</text>
+  <text x="815" y="450" font-size="13">where it came from</text>
+  <rect x="1055" y="360" width="235" height="110" rx="10" fill="#f6f6f6" stroke="#999"/>
+  <text x="1070" y="388" font-size="15" font-weight="bold" fill="#555">Not shown as fact</text>
+  <text x="1070" y="412" font-size="13">listed apart with the reason:</text>
+  <text x="1070" y="431" font-size="13">quote not found, date or</text>
+  <text x="1070" y="450" font-size="13">amount not in the quote</text>
+  <line x1="917" y1="288" x2="917" y2="355" stroke="#2f6b3a" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="1172" y1="288" x2="1172" y2="355" stroke="#999" stroke-width="2" marker-end="url(#a)"/>
+
+  <text x="800" y="505" font-size="13" fill="#333">Build time: images + model file (pinned revision, size-checked).</text>
+  <text x="800" y="526" font-size="13" fill="#333">Runtime: no installs, no telemetry, no calls except the endpoint.</text>
+</svg>
